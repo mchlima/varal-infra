@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Único comando que a chave do usuário `deploy` pode rodar no VPS (forced command no
+# authorized_keys). Aceita só os comandos abaixo; o resto é recusado.
+#   api <vX.Y.Z>              imagem da API (docker save | gzip) pela entrada padrão
+#   app <panel|admin> <vX.Y.Z> build estático (tar.gz de .output/public) pela entrada padrão
+#   status                    versões no ar
+set -euo pipefail
+readonly BIN=/opt/varal/bin
+readonly VERSION_RE='^v[0-9]+\.[0-9]+\.[0-9]+$'
+
+read -r -a args <<<"${SSH_ORIGINAL_COMMAND:-}"
+case "${args[0]:-} ${#args[@]}" in
+  "api 2")
+    [[ "${args[1]}" =~ $VERSION_RE ]] || { echo "versão inválida" >&2; exit 2; }
+    exec "$BIN/deploy-api" "${args[1]}" ;;
+  "app 3")
+    [[ "${args[1]}" == panel || "${args[1]}" == admin ]] || { echo "app inválido" >&2; exit 2; }
+    [[ "${args[2]}" =~ $VERSION_RE ]] || { echo "versão inválida" >&2; exit 2; }
+    exec "$BIN/deploy-app" "${args[1]}" "${args[2]}" ;;
+  "status 1")
+    exec "$BIN/deploy-status" ;;
+  *)
+    echo "comando não permitido" >&2; exit 1 ;;
+esac

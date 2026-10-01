@@ -12,7 +12,7 @@ Os arquivos de `conf.d/` são os hosts do Varal no NGINX compartilhado do VPS (`
 
 - Certificado de origem do Cloudflare (`*.kratinho.com.br`, válido até 2041) em `/opt/nginx/certs/kratinho.com.br/origin.pem` e `origin.key`. Eles nunca entram no repositório.
 - `/opt/nginx/snippets/cloudflare-realip.conf`, compartilhado, com as faixas de IP do Cloudflare.
-- Builds estáticos em `/opt/nginx/html/varal-panel/` e `/opt/nginx/html/varal-admin/`.
+- Builds estáticos em `/opt/nginx/html/varal-<app>/releases/<versão>/`, com o link `current` apontando para a versão no ar (trocado pelo `deploy-app`, ver `prod/README.md`).
 - API no container `varal-api`, porta 3000, na rede `proxy`. Enquanto ela não existe, as rotas da API respondem 502.
 
 ## Aplicar no VPS
