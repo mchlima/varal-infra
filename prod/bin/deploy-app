@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Publica uma versão de um app (build estático) no NGINX compartilhado: extrai em
+# releases/<versão> e troca o link `current` de uma vez. Voltar versão = apontar o link de volta.
+set -euo pipefail
+readonly APP="$1" VERSION="$2"
+readonly ROOT="/opt/nginx/html/varal-$APP"
+readonly TARGET="$ROOT/releases/$VERSION"
+readonly TMP="$TARGET.tmp.$$"
+
+mkdir -p "$ROOT/releases"
+rm -rf "$TMP"
+mkdir "$TMP"
+trap 'rm -rf "$TMP"' EXIT
+tar -xzf - -C "$TMP" --no-same-owner --no-same-permissions
+[[ -f "$TMP/index.html" ]] || { echo "build sem index.html" >&2; exit 1; }
+chmod -R a+rX "$TMP"
+rm -rf "$TARGET"
+mv "$TMP" "$TARGET"
+trap - EXIT
+
+ln -sfn "releases/$VERSION" "$ROOT/current.new"
+mv -T "$ROOT/current.new" "$ROOT/current"
+
+# Mantém as 5 versões mais recentes (nunca a atual).
+ls -1 "$ROOT/releases" | grep -E '^v[0-9]' | sort -V -r | tail -n +6 | while read -r old; do
+  [[ "$old" == "$VERSION" ]] || rm -rf "$ROOT/releases/$old"
+done
+echo "==> varal-$APP $VERSION no ar"

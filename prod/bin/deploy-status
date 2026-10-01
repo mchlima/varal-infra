@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Versões no ar.
+set -euo pipefail
+health="$(docker inspect -f '{{.State.Health.Status}}' varal-api 2>/dev/null | tr -d '\n' || true)"
+echo "api:   $(cat /opt/varal/state/api-version 2>/dev/null || echo '-') (${health:-sem container})"
+for app in panel admin; do
+  echo "$app: $(readlink /opt/nginx/html/varal-$app/current 2>/dev/null | sed 's|releases/||' || echo '-')"
+done
