@@ -1,4 +1,7 @@
-# Postgres de desenvolvimento compartilhado por todos os worktrees da API (spec 01, RN-01.06).
+# Ambiente de desenvolvimento compartilhado por todos os worktrees:
+# - Postgres (spec 01, RN-01.06);
+# - Mailpit: servidor SMTP local que guarda os e-mails enviados pela API sem entregá-los
+#   (SMTP em localhost:1025, caixa de entrada em http://localhost:8025).
 # Cada worktree usa um banco próprio (varal_<slug> e varal_<slug>_test), criado pelo
 # scripts/worktree.sh do varal-web-api.
 #
@@ -27,6 +30,16 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+
+  mailpit:
+    image: axllent/mailpit:v1.31
+    container_name: varal-dev-mail
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:1025:1025"
+      - "127.0.0.1:8025:8025"
+    environment:
+      MP_MAX_MESSAGES: 2000
 
 volumes:
   data:

@@ -17,6 +17,13 @@ docker compose -f dev/compose.yml ps        # situação
 - Cada worktree do `varal-web-api` cria os próprios bancos (`varal_<slug>` e `varal_<slug>_test`) com o `scripts/worktree.sh`.
 - Nunca rode `docker compose -f dev/compose.yml down -v` nem apague o volume `varal-dev-db-data`: isso apaga os bancos de todos.
 
+## E-mail de desenvolvimento (Mailpit)
+
+O mesmo Compose sobe o Mailpit, que recebe os e-mails enviados pela API em desenvolvimento e não entrega nada a ninguém.
+
+- SMTP: `localhost:1025`, sem autenticação e sem TLS. Use na API: `SMTP_HOST=localhost`, `SMTP_PORT=1025`.
+- Caixa de entrada: http://localhost:8025
+
 ## NGINX
 
 Hosts do Varal no NGINX compartilhado do VPS: ver [`nginx/README.md`](nginx/README.md).
